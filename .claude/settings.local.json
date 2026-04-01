@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"C:/Users/aryan/Desktop/SAMHITA/samhita-backend/\"*.pdf)",
+      "Bash(ls \"C:/Users/aryan/Desktop/SAMHITA/samhita-backend/demo\"*)",
+      "Bash(ls \"C:/Users/aryan/Desktop/SAMHITA/samhita-backend/test\"*)",
+      "Bash(ls \"C:/Users/aryan/Desktop/SAMHITA/samhita-backend/sample\"*)",
+      "Bash(find C:/Users/aryan/Desktop/SAMHITA/samhita-backend/uploads -maxdepth 2 -name *.pdf -o -name *.txt -o -name *.png)",
+      "Bash(ls:*)",
+      "Bash(python test_entity_extraction.py)"
+    ]
+  }
+}
