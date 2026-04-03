@@ -25,18 +25,12 @@ app = FastAPI(
 )
 
 # CORS — allow frontend
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["https://samhita-mjvo.vercel.app/", "https://samhita-gh4f.onrender.com/", "*"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # allow all (TEST ONLY)
-    allow_credentials=False,
+    allow_origins=[
+    "http://localhost:3000",
+    "https://samhita-mjvo.vercel.app"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -96,23 +90,20 @@ def root():
         "health": "/health",
     }
     
-@app.get("/cors-test")
-def cors_test():
-    return {"message": "CORS is working"}
     
     
-    
-    
-    from fastapi.middleware.cors import CORSMiddleware
-
-app.add_middleware(
+    app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://samhita-mjvo.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)
-
+) 
+    
+    
+    
 
 
 
