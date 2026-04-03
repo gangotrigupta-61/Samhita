@@ -1,18 +1,31 @@
 """Samhita Backend — FastAPI Entry Point"""
+
 import os
 import logging
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from models.document import init_db
-from routers import upload, documents, review, export, analytics, alerts, chat, voice, cases, claims
 
-# Configure logging
+from models.document import init_db
+from routers import (
+    upload,
+    documents,
+    review,
+    export,
+    analytics,
+    alerts,
+    chat,
+    voice,
+    cases,
+    claims,
+)
+
+from middleware.auth import AuthMiddleware
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -24,22 +37,20 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS — allow frontend
+# Add Auth first, CORS last so CORS runs before auth on requests
+app.add_middleware(AuthMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-    "http://localhost:3000",
-    "https://samhita-mjvo.vercel.app"],
+        "https://samhita-mjvo.vercel.app",
+        "http://localhost:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Auth — Supabase JWT validation (disabled in dev when SUPABASE_URL is empty)
-from middleware.auth import AuthMiddleware
-app.add_middleware(AuthMiddleware)
-
-# Include routers
 app.include_router(upload.router)
 app.include_router(documents.router)
 app.include_router(review.router)
@@ -51,7 +62,6 @@ app.include_router(voice.router)
 app.include_router(cases.router)
 app.include_router(claims.router)
 
-# Serve uploaded files statically (for document preview)
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
@@ -59,7 +69,6 @@ app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 @app.on_event("startup")
 def startup():
-    # Ensure data directory exists
     os.makedirs(os.path.join(os.path.dirname(__file__), "data"), exist_ok=True)
     try:
         init_db()
@@ -67,8 +76,8 @@ def startup():
     except Exception as e:
         logging.error(f"Database init failed (will retry on first request): {e}")
 
-    # Initialize Supabase Storage bucket
     from services.storage import is_enabled, ensure_bucket
+
     if is_enabled():
         ensure_bucket()
         logging.info("Supabase Storage enabled")
@@ -89,22 +98,3 @@ def root():
         "docs": "/docs",
         "health": "/health",
     }
-    
-    
-    
-    app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "https://samhita-mjvo.vercel.app"
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-) 
-    
-    
-    
-
-
-
-
