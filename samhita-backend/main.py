@@ -38,7 +38,7 @@ app = FastAPI(
 )
 
 # Add Auth first, CORS last so CORS runs before auth on requests
-app.add_middleware(AuthMiddleware)
+# app.add_middleware(AuthMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
