@@ -1,6 +1,6 @@
 """Gemini 2.0 Flash Vision — Document Understanding Service"""
-from google import genai
-from google.genai import types
+import google.generativeai as genai
+from google.generativeai import types
 import base64
 import json
 import os

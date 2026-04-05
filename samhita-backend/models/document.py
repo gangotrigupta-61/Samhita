@@ -1,59 +1,34 @@
-from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, Text, DateTime, ForeignKey, Numeric, Index
-from sqlalchemy.orm import declarative_base, sessionmaker, relationship
-from datetime import datetime
 import os
-import socket
-from urllib.parse import urlparse
+from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, Text, DateTime, ForeignKey, Numeric, Index
+from sqlalchemy.orm import sessionmaker, declarative_base, relationship
+from datetime import datetime
 
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL is not set. Point it to your Supabase PostgreSQL connection string.")
-
-# Resolve hostname — try IPv4, then IPv6, then DNS-over-HTTPS fallback
-_connect_args = {}
-try:
-    parsed = urlparse(DATABASE_URL)
-    if parsed.hostname:
-        resolved = None
-        # Try local DNS (IPv4 then IPv6)
-        for family in (socket.AF_INET, socket.AF_INET6):
-            try:
-                resolved = socket.getaddrinfo(parsed.hostname, parsed.port or 5432, family)[0][4][0]
-                break
-            except socket.gaierror:
-                continue
-        # Fallback: DNS-over-HTTPS via Google
-        if not resolved:
-            try:
-                import requests
-                for qtype in ("A", "AAAA"):
-                    resp = requests.get(
-                        f"https://dns.google/resolve?name={parsed.hostname}&type={qtype}",
-                        timeout=5,
-                    )
-                    answers = resp.json().get("Answer", [])
-                    if answers:
-                        resolved = answers[0]["data"]
-                        break
-            except Exception:
-                pass
-        if resolved:
-            _connect_args["hostaddr"] = resolved
-except Exception:
-    pass
 
 engine = create_engine(
     DATABASE_URL,
     pool_size=5,
     max_overflow=10,
     pool_pre_ping=True,
+    pool_recycle=300,
     echo=False,
-    connect_args=_connect_args,
+    connect_args={"sslmode": "require"}  # ✅ Supabase fix
 )
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
 def get_db():
     db = SessionLocal()
     try:

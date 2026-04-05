@@ -1,10 +1,26 @@
 """Samhita Backend — FastAPI Entry Point"""
 
+ 
+
+
+# import os
+# import logging
+# from dotenv import load_dotenv
+
+# load_dotenv()
+
 import os
-import logging
 from dotenv import load_dotenv
 
+# ✅ LOAD ENV FIRST
 load_dotenv()
+
+# ✅ NOW this will work
+print("DATABASE_URL:", os.getenv("DATABASE_URL"))
+
+import logging
+
+
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
